@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import Board from './Board';
 
+function shuffleArray(array: any[]) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
 const App: React.FC = () => {
   const [animals, setAnimals] = useState<{ url: string; name: string }[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
+  const [guessedCards, setGuessedCards] = useState<number[]>([]);
+  const [errors, setErrors] = useState(0);
+  const [matches, setMatches] = useState(0);
 
   useEffect(() => {
     const fetchAnimals = async () => {
@@ -20,6 +30,7 @@ const App: React.FC = () => {
       });
 
       const duplicatedAnimals = [...animalsData, ...animalsData];
+      shuffleArray(duplicatedAnimals);
       setAnimals(duplicatedAnimals);
     };
 
@@ -27,21 +38,43 @@ const App: React.FC = () => {
   }, []);
 
   const onCardClick = (index: number) => {
-    if (flippedCards.length === 2) {
-      setFlippedCards([]);
+    if (flippedCards.length === 1) {
+      const [firstIndex] = flippedCards;
+
+      if (
+        animals[firstIndex].name === animals[index].name &&
+        firstIndex !== index
+      ) {
+        setMatches(matches + 1);
+        setGuessedCards([...guessedCards, firstIndex, index]);
+        setFlippedCards([]);
+      } else {
+        setErrors(errors + 1);
+        setFlippedCards([firstIndex, index]);
+        setTimeout(() => setFlippedCards([]), 1000); // wait 1 second, then flip them back
+      }
     } else {
-      setFlippedCards([...flippedCards, index]);
+      setFlippedCards([index]);
     }
   };
 
   return (
     <div className="app bg-gray-100 min-h-screen py-8">
       <h1 className="text-center text-2xl font-bold mb-4">Memory Game</h1>
+      <div className="text-center mb-4">
+        <span className="mr-4">Errors: {errors}</span>
+        <span>Matches: {matches}</span>
+      </div>
       <Board
         animals={animals}
-        flippedCards={flippedCards}
+        flippedCards={flippedCards.concat(guessedCards)}
         onCardClick={onCardClick}
       />
+      {matches === animals.length / 2 && (
+        <div className="text-center mt-4 text-2xl font-bold">
+          Congratulations!
+        </div>
+      )}
     </div>
   );
 };
