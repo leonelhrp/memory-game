@@ -5,24 +5,23 @@ interface BoardProps {
   animals: { url: string; name: string }[];
   flippedCards: number[];
   onCardClick: (index: number) => void;
+  match: Boolean;
 }
 
 const Board: React.FC<BoardProps> = ({
   animals,
   flippedCards,
   onCardClick,
+  match,
 }) => {
   const [showCelebration, setShowCelebration] = useState(false);
 
   useEffect(() => {
-    if (flippedCards.length === 2) {
-      const [firstIndex, secondIndex] = flippedCards;
-      if (animals[firstIndex].name === animals[secondIndex].name) {
-        setShowCelebration(true);
-        setTimeout(() => setShowCelebration(false), 1000);
-      }
+    if (match) {
+      setShowCelebration(true);
+      setTimeout(() => setShowCelebration(false), 1000);
     }
-  }, [flippedCards]);
+  }, [match]);
 
   return (
     <div className="board flex flex-wrap justify-center">

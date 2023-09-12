@@ -12,8 +12,9 @@ const App: React.FC = () => {
   const [animals, setAnimals] = useState<{ url: string; name: string }[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [guessedCards, setGuessedCards] = useState<number[]>([]);
-  const [errors, setErrors] = useState(0);
-  const [matches, setMatches] = useState(0);
+  const [errors, setErrors] = useState<number>(0);
+  const [matches, setMatches] = useState<number>(0);
+  const [match, setMatch] = useState<Boolean>(false);
 
   useEffect(() => {
     const fetchAnimals = async () => {
@@ -45,13 +46,14 @@ const App: React.FC = () => {
         animals[firstIndex].name === animals[index].name &&
         firstIndex !== index
       ) {
+        setMatch(true);
         setMatches(matches + 1);
         setGuessedCards([...guessedCards, firstIndex, index]);
         setFlippedCards([]);
       } else {
+        setMatch(false);
         setErrors(errors + 1);
         setFlippedCards([firstIndex, index]);
-        setTimeout(() => setFlippedCards([]), 1000); // wait 1 second, then flip them back
       }
     } else {
       setFlippedCards([index]);
@@ -69,6 +71,7 @@ const App: React.FC = () => {
         animals={animals}
         flippedCards={flippedCards.concat(guessedCards)}
         onCardClick={onCardClick}
+        match={match}
       />
       {matches === animals.length / 2 && (
         <div className="text-center mt-4 text-2xl font-bold">
